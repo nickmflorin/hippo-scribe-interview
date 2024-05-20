@@ -14,6 +14,7 @@ const RecordingStateVariantMap: { [key in RecordingState]: IconButtonVariant } =
   [RecordingState.READY]: "primary",
   [RecordingState.OPENING]: "primary",
   [RecordingState.OPEN]: "primary",
+  [RecordingState.STOPPED]: "primary",
   [RecordingState.PAUSING]: "primary",
   [RecordingState.PAUSED]: "primary",
   [RecordingState.ERROR]: "danger",

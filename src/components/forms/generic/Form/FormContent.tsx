@@ -2,9 +2,8 @@ import { type ReactNode } from "react";
 
 import clsx from "clsx";
 
+import { Loading } from "~/components/feedback/Loading";
 import { type ComponentProps } from "~/components/types";
-
-import * as types from "../types";
 
 export interface FormContentProps {
   readonly contentClassName?: ComponentProps["className"];
@@ -24,8 +23,8 @@ export const FormContent = ({
       "overflow-y-auto pr-[18px]": isScrollable,
     })}
   >
-    {/* <Loading isLoading={isLoading}> */}
-    <div className={clsx("flex flex-col gap-[8px]", contentClassName)}>{children}</div>
-    {/* </Loading> */}
+    <Loading isLoading={isLoading}>
+      <div className={clsx("flex flex-col gap-[8px]", contentClassName)}>{children}</div>
+    </Loading>
   </div>
 );

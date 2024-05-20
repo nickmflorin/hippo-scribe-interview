@@ -26,8 +26,6 @@ export type MicrophoneConfig = {
 };
 
 export const MicrophoneProvider = ({ children }: MicrophoneProviderProps) => {
-  /* const [state, setState] = useState<MicrophoneState>(MicrophoneState.NotSetup);
-     const [microphone, setMicrophone] = useState<MediaRecorder | null>(null); */
   const [microphone, setMicrophone] = useState<MediaRecorder | null>(null);
   const [state, setState] = useState<RecordingState>(RecordingState.NOT_READY);
   const [error, setError] = useState<string | null>(null);
@@ -59,8 +57,7 @@ export const MicrophoneProvider = ({ children }: MicrophoneProviderProps) => {
 
   const stop = useCallback(() => {
     microphone?.stop();
-    setMicrophone(null);
-    setState(RecordingState.NOT_READY);
+    setState(RecordingState.STOPPED);
   }, [microphone]);
 
   const pause = useCallback(() => {
@@ -77,25 +74,23 @@ export const MicrophoneProvider = ({ children }: MicrophoneProviderProps) => {
 
   const record = useCallback(
     async (config?: MicrophoneConfig) => {
-      if ([RecordingState.READY, RecordingState.PAUSED, RecordingState.NOT_READY].includes(state)) {
-        let mic: MediaRecorder | null;
-        if (!microphone || state === RecordingState.NOT_READY) {
-          logger.info("Creating new microphone instance.");
-          mic = await configure(config);
+      let mic: MediaRecorder | null;
+      if (!microphone || state === RecordingState.NOT_READY) {
+        logger.info("Creating new microphone instance.");
+        mic = await configure(config);
+      } else {
+        mic = microphone;
+      }
+      if (mic) {
+        setState(RecordingState.OPENING);
+        if (state === RecordingState.PAUSED) {
+          mic.resume();
         } else {
-          mic = microphone;
+          logger.info("Starting microphone recording after it was in an inactive state.");
+          mic.start(250);
         }
-        if (mic) {
-          setState(RecordingState.OPENING);
-          if (state === RecordingState.PAUSED) {
-            mic.resume();
-          } else {
-            logger.info("Starting microphone recording after it was in an inactive state.");
-            mic.start(250);
-          }
-          setMicrophone(mic);
-          setState(RecordingState.OPEN);
-        }
+        setMicrophone(mic);
+        setState(RecordingState.OPEN);
       }
     },
     [microphone, state, configure],

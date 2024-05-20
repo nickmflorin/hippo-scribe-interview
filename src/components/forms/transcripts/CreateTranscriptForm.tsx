@@ -12,27 +12,29 @@ import { TranscriptForm } from "./TranscriptForm";
 
 export const CreateTranscriptForm = () => {
   const form = useTranscriptForm();
-  const { recordingState, startRecording, stopRecording, pauseRecording } = useTranscribedAudio({
-    transcribe: parseTranscriptAudio,
-    onTranscribed: data => {
-      if (data.firstName) {
-        form.setValue("firstName", data.firstName);
-      }
-      if (data.lastName) {
-        form.setValue("lastName", data.lastName);
-      }
-      if (data.transcript) {
-        form.setValue("transcript", data.transcript);
-      }
-    },
-    onTranscribedError: error => {
-      /* Whether or not we would want to use the error directly here, or instead use a more
+  const { recordingState, isTranscribing, startRecording, stopRecording, pauseRecording } =
+    useTranscribedAudio({
+      transcribe: parseTranscriptAudio,
+      onTranscribed: data => {
+        if (data.firstName) {
+          form.setValue("firstName", data.firstName);
+        }
+        if (data.lastName) {
+          form.setValue("lastName", data.lastName);
+        }
+        if (data.transcript) {
+          form.setValue("transcript", data.transcript);
+        }
+      },
+      onTranscribedError: error => {
+        /* Whether or not we would want to use the error directly here, or instead use a more
          "user-friendly" error, would be determined later. */
-      form.setErrors(error);
-    },
-  });
+        form.setErrors(error);
+      },
+    });
   return (
     <TranscriptForm
+      isLoading={isTranscribing}
       title={
         <div className="flex flex-row items-center justify-between">
           <Title order={4} className="leading-[24px]">

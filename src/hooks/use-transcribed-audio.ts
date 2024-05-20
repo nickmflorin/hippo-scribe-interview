@@ -1,7 +1,12 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 
-import { LiveTranscriptionEvents, type LiveTranscriptionEvent } from "@deepgram/sdk";
+import {
+  LiveConnectionState,
+  LiveTranscriptionEvents,
+  type LiveTranscriptionEvent,
+} from "@deepgram/sdk";
 
+import { RecordingState } from "~/lib/recording-state";
 import { useDeepgram } from "~/hooks/use-deepgram";
 import { useMicrophone } from "~/hooks/use-microphone";
 
@@ -27,7 +32,13 @@ export const useTranscribedAudio = <D extends Record<string, unknown>>({
   onMicrophoneError,
   onTranscribedError,
 }: UseTranscribedAudioConfig<D>) => {
-  const { connection, connect: connectToDeepgram, disconnect } = useDeepgram();
+  const transcribedText = useRef<string[]>([]);
+  const {
+    connection,
+    state: connectionState,
+    connect: connectToDeepgram,
+    disconnect,
+  } = useDeepgram();
   const {
     record: startMicrophone,
     stop: stopMicrophone,
@@ -37,46 +48,62 @@ export const useTranscribedAudio = <D extends Record<string, unknown>>({
     state: recordingState,
   } = useMicrophone();
   const [transcriptionError, setTranscriptionError] = useState<string | null>(null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
 
   useEffect(() => {
-    const onTranscript = async (data: LiveTranscriptionEvent) => {
-      const { is_final: isFinal, speech_final: speechFinal } = data;
-      const text = data.channel.alternatives[0].transcript;
-      if (text.trim() !== "" && isFinal && speechFinal) {
-        setTranscriptionError(null);
-        const response = await transcribe(text);
-        if ("error" in response) {
-          /* Maintain the transcription error in state but also expose via a callback so the error
-             can be managed both declaratively and reactively.  Declarative handling is important
-             for usage in forms. */
-          setTranscriptionError(response.error);
-          return onTranscribedError?.(response.error);
-        }
-        return onTranscribed(response.data);
-      }
-    };
-
-    if (connection && microphone) {
-      const microphoneListener = (e: BlobEvent) => {
-        connection?.send(e.data);
+    if (
+      connection &&
+      microphone &&
+      recordingState === RecordingState.OPEN &&
+      connectionState === LiveConnectionState.OPEN
+    ) {
+      const onTranscript = async (data: LiveTranscriptionEvent) => {
+        const text = data.channel.alternatives[0].transcript;
+        transcribedText.current = [...transcribedText.current, text];
       };
 
-      connection.on(LiveTranscriptionEvents.Open, () => {
-        connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
-        microphone.addEventListener(MicrophoneEvents.DataAvailable, microphoneListener);
+      const microphoneListener = (e: BlobEvent) => {
+        connection.send(e.data);
+      };
 
-        microphone.onstop = () => {
-          microphone.removeEventListener(MicrophoneEvents.DataAvailable, microphoneListener);
-        };
-      });
-    }
-    return () => {
-      if (connection) {
+      microphone.addEventListener(MicrophoneEvents.DataAvailable, microphoneListener);
+      connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
+
+      return () => {
+        microphone.removeEventListener(MicrophoneEvents.DataAvailable, microphoneListener);
         connection.removeAllListeners();
-      }
-    };
+      };
+    }
+  }, [connection, microphone, connectionState, recordingState]);
+
+  useEffect(() => {
+    if (microphone) {
+      const microphoneStoppedListener = async () => {
+        const text = transcribedText.current[transcribedText.current.length - 1];
+        transcribedText.current = [];
+
+        if (text && text.trim() !== "") {
+          setTranscriptionError(null);
+          setIsTranscribing(true);
+          const response = await transcribe(text);
+          setIsTranscribing(false);
+          if ("error" in response) {
+            /* Maintain the transcription error in state but also expose via a callback so the error
+               can be managed both declaratively and reactively.  Declarative handling is important
+               for usage in forms. */
+            setTranscriptionError(response.error);
+            return onTranscribedError?.(response.error);
+          }
+          return onTranscribed(response.data);
+        }
+      };
+      microphone.addEventListener(MicrophoneEvents.Stop, microphoneStoppedListener);
+      return () => {
+        microphone.removeEventListener(MicrophoneEvents.Stop, microphoneStoppedListener);
+      };
+    }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [connection, microphone]);
+  }, [microphone]);
 
   const startRecording = useCallback(async () => {
     startMicrophone({ onError: onMicrophoneError });
@@ -95,5 +122,6 @@ export const useTranscribedAudio = <D extends Record<string, unknown>>({
     stopRecording,
     pauseRecording: pauseMicrophone,
     recordingState,
+    isTranscribing,
   };
 };
