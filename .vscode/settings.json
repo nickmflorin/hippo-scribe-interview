@@ -1,0 +1,61 @@
+{
+  // There are configuration settings in here that would ideally exist in either the User's
+  // personal VSCode settings, while others which are more suited for the Workspaace/Project's
+  // settings.  The rules that are more suited for the User's personal settings are still
+  // included here for purposes of this interview assignment, so I can get VSCode to work as I
+  // prefer it to.  I will separate out which rules would be ones that apply to the
+  // Workspace/Project, and which rules I would otherwise keep in my local settings.
+
+  // Personal Settings - These settings would be just for me.
+  "editor.rulers": [100],
+  "eslint.nodePath": "/Users/nickflorin/.nvm/versions/node/v20.0.0/bin/node",
+  "typescript.updateImportsOnFileMove.enabled": "prompt",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.referencesCodeLens.enabled": true,
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.renameMatchingJsxTags": true,
+
+  // Workspace/Project Settings - These settings would be shared across developers.  These
+  // settings are designed to make code formatting consistent between developers while also
+  // abiding by the repository's Prettier/ESLint configurations.
+  "editor.tabSize": 2,
+  "editor.trimAutoWhitespace": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.associations": {
+    "*.tsx": "typescriptreact",
+    "*.ts": "typescript"
+  },
+  "[scss,css,less]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "eslint.run": "onSave",
+  "eslint.probe": ["typescript", "typescriptreact", "html", "markdown", "scss"],
+  "eslint.format.enable": true,
+  "eslint.execArgv": ["--max-old-space-size=16384"],
+  "eslint.debug": false,
+  // We are more selective about which ESLint rules we want to validate on save because some
+  // rules, particularly @typescript-eslint/* rules, can be incredibly slow to run on each file
+  // save.
+  "eslint.codeActionsOnSave.rules": [
+    "import/*",
+    "quotes",
+    "arrow-body-style",
+    "multiline-comment-style",
+    "prefer-const",
+    "react/jsx-curly-brace-presence",
+    "@typescript-eslint/consistent-type-imports"
+  ],
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "typescript.format.enable": false,
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "typescript.format.semicolons": "insert",
+  "typescript.format.placeOpenBraceOnNewLineForControlBlocks": true,
+  "typescript.preferences.quoteStyle": "double",
+  "javascript.format.enable": false
+}
