@@ -1,0 +1,82 @@
+@use "partials";
+@use "sass:map";
+
+@use "./fn" as *;
+
+@mixin truncate {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+@mixin clamp($line-clamp: 2) {
+  @include truncate;
+  -webkit-line-clamp: $line-clamp;
+  -webkit-box-orient: vertical;
+  display: block;
+}
+
+@mixin inherit-font-properties() {
+  color: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-transform: inherit;
+  text-decoration: inherit;
+}
+
+@mixin font($type, $args...) {
+  $properties: get-font($type, $args...);
+  @include partials.mapped-properties($properties);
+}
+
+@mixin with-font-sizes($type) {
+  @each $size in map.get($typography-sizes, $type) {
+    $properties: get-font($type, $size: $size);
+    @content ($size, $properties);
+  }
+}
+
+@mixin with-font-weights() {
+  @each $weight in $font-weight-names {
+    &.font-weight-#{$weight} {
+      font-weight: get-font-weight($weight: $weight);
+    }
+  }
+}
+
+@mixin with-font-families() {
+  &.font-family-inter {
+    font-family: $font-family-inter;
+  }
+}
+
+@mixin with-text-transforms() {
+  @each $transform in $text-transforms {
+    &.transform-#{$transform} {
+      text-transform: $transform;
+    }
+  }
+}
+
+@mixin with-fonts($type) {
+  color: get-font-color($type);
+
+  @include with-font-weights();
+  @include with-font-families();
+  @include with-text-transforms();
+
+  @include with-font-sizes($type) using ($size, $data) {
+    &.font-size-#{$size} {
+      font-size: map.get($data, font-size);
+      line-height: map.get($data, line-height);
+      font-weight: map.get($data, font-weight);
+
+      // Allow the font-weight to be overridden for each size.
+      @include with-font-weights();
+
+      @content ($data);
+    }
+  }
+}

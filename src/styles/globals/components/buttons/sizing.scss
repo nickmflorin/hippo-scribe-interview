@@ -1,0 +1,138 @@
+@use "sass:list";
+@use "sass:map";
+@use "sass:meta";
+
+@use "partials";
+@use "./constants" as *;
+
+$button-padding: (
+  "button": (
+    "xsmall": 6px 14px,
+    "small": 8px 16px,
+    "medium": 10px 20px,
+    "large": 14px 30px,
+    "xlarge": 16px 30px,
+  ),
+);
+
+@function get-button-padding($type, $size: null) {
+  $size: if($size, $size, $button-default-size);
+  @if $type == "link" or $type == "icon-button" {
+    @return 0px;
+  }
+  @return map.get(map.get($button-padding, $type), $size);
+}
+
+$button-sizes: (
+  "button": (
+    "xsmall": 28px,
+    "small": 32px,
+    "medium": 36px,
+    "large": 40px,
+    "xlarge": 48px,
+  ),
+  "icon-button": (
+    "xsmall": 28px,
+    "small": 32px,
+    "medium": 36px,
+    "large": 40px,
+    "xlarge": 48px,
+  ),
+);
+
+@function get-button-size($type, $size: null) {
+  $size: if($size, $size, $button-default-size);
+  @return map.get($button-sizes, $type, $size);
+}
+
+$button-icon-sizes: (
+  "button": (
+    "xsmall": map.get($button-sizes, "button", "xsmall") - 2 *
+      list.nth(map.get($button-padding, "button", "xsmall"), 1),
+    "small": map.get($button-sizes, "button", "small") - 2 *
+      list.nth(map.get($button-padding, "button", "small"), 1),
+    "medium": map.get($button-sizes, "button", "medium") - 2 *
+      list.nth(map.get($button-padding, "button", "medium"), 1),
+    "large": map.get($button-sizes, "button", "large") - 2 *
+      list.nth(map.get($button-padding, "button", "large"), 1),
+    "xlarge": map.get($button-sizes, "button", "xlarge") - 2 *
+      list.nth(map.get($button-padding, "button", "xlarge"), 1),
+    "full": 100%,
+  ),
+  "link": (
+    "xsmall": 13px,
+    "small": 14px,
+    "medium": 16px,
+    "large": 18px,
+    "xlarge": 20px,
+    "full": 100%,
+  ),
+  "icon-button": (
+    "xsmall": 13px,
+    "small": 14px,
+    "medium": 16px,
+    "large": 18px,
+    "xlarge": 20px,
+    "full": 100%,
+  ),
+);
+
+@function get-button-icon-size($type, $size) {
+  @return map.get($button-icon-sizes, $type, $size);
+}
+
+@mixin button-icon-size($type, $size) {
+  .icon {
+    height: get-button-icon-size($type, $size: $size);
+  }
+}
+
+@mixin button-size($type, $size) {
+  $height: get-button-size($type, $size: $size);
+
+  height: $height;
+  padding: get-button-padding($type, $size: $size);
+  min-height: $height;
+
+  @include button-icon-size($type, $size);
+
+  @if $type == "icon-button" {
+    width: $height;
+  }
+}
+
+@mixin button-sizes($type) {
+  @if $type == "icon-button" or $type == "button" {
+    // The button may or may not have a size class name, depending on whether or not the size prop
+    // was provided to the component as a discrete size (e.g. "small", "medium") or a constant size
+    // string (e.g. 32px).
+    @each $size in $button-size-names {
+      &.button--size-#{$size} {
+        @include button-size($type, $size);
+        // Allow the icon size in the button to be controlled independently of the button's primary
+        // size if the class name is present.
+        @each $size in $button-icon-size-names {
+          // The button may or may not have an icon size class name, depending on whether or not the
+          // icon size prop was provided to the component as a discrete size (e.g. "small", "medium"),
+          // a constant size string (e.g. 32px), or not at all.
+          &.button--icon-size-#{$size} {
+            @include button-icon-size($type, $size);
+          }
+        }
+      }
+    }
+  } @else {
+    // Consider 'small' to be the default.
+    @include button-icon-size($type, "small");
+    // The Link is sized based on the line height of its text, but it still can have icons - which
+    // need to be sized explicitly.
+    @each $size in $button-icon-size-names {
+      // The button may or may not have an icon size class name, depending on whether or not the
+      // icon size prop was provided to the component as a discrete size (e.g. "small", "medium"),
+      // a constant size string (e.g. 32px), or not at all.
+      &.button--icon-size-#{$size} {
+        @include button-icon-size($type, $size);
+      }
+    }
+  }
+}

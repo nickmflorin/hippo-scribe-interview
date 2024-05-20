@@ -1,0 +1,53 @@
+@use "sass:map";
+@use "partials";
+@use "./constants" as constants;
+
+$input-sizes: ("small", "medium", "large");
+$input-default-size: "medium";
+
+$input-size-properties: (
+  "small": (
+    "height": 28px,
+    "font-size": 13px,
+    "line-height": 20px,
+    "padding": 4px 10px,
+  ),
+  "medium": (
+    "height": 32px,
+    "font-size": 14px,
+    "line-height": 24px,
+    "padding": 4px 12px,
+  ),
+  "large": (
+    "height": 36px,
+    "font-size": 14px,
+    "line-height": 28px,
+    "padding": 4px 12px,
+  ),
+);
+
+@function get-input-size-properties($size) {
+  @return map.get($input-size-properties, $size);
+}
+
+@function get-input-font-size($size) {
+  @return map.get($input-size-properties, $size, font-size);
+}
+
+@mixin input-size($size, $type) {
+  $properties: get-input-size-properties($size);
+  // Note: The font size may be overridden for a given Input component with props.  The logic that
+  // handles that overridding is in the index.scss file.
+  font-size: map.get($properties, "font-size");
+  line-height: map.get($properties, "line-height");
+  padding: map.get($properties, "padding");
+
+  @if $type != "text-area" {
+    min-height: map.get($properties, "height");
+
+    &:not(.input--dynamic-height) {
+      height: map.get($properties, "height");
+      max-height: map.get($properties, "height");
+    }
+  }
+}

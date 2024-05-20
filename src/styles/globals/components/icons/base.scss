@@ -1,0 +1,19 @@
+@mixin icon-svg-base() {
+  max-height: 100%;
+  max-width: 100%;
+  vertical-align: 0;
+  padding: 0;
+  align-items: center;
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+}
+
+@mixin svg-base() {
+  fill: currentcolor;
+
+  path {
+    color: inherit;
+    fill: inherit;
+  }
+}

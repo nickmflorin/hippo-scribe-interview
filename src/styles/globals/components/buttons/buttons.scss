@@ -1,0 +1,103 @@
+@use "sass:list";
+@use "sass:map";
+
+@use "partials";
+@use "../typography" as typography;
+
+@use "./base" as *;
+@use "./constants" as constants;
+@use "./mixins" as mixins;
+@use "./variants" as variants;
+
+a:not(.button--type-link) {
+  @include button-base();
+  color: inherit;
+  text-decoration: none;
+}
+
+@mixin inherit-properties() {
+  color: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  text-align: inherit;
+}
+
+@mixin button-structure() {
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  > .button__content {
+    text-align: inherit;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    vertical-align: middle;
+    overflow: hidden;
+    max-width: 100%;
+    flex-grow: 100;
+    gap: 8px;
+    @include inherit-properties();
+
+    > .button__sub-content {
+      text-decoration: none;
+      max-width: 100%;
+      flex-grow: 100;
+      @include typography.truncate();
+      @include inherit-properties();
+    }
+  }
+}
+
+.button {
+  @include partials.border-radius(constants.$button-border-radius);
+  @include mixins.button-locked-or-loading();
+
+  .icon {
+    aspect-ratio: 1;
+    width: auto;
+    color: inherit;
+    filter: inherit;
+  }
+
+  &--type-button {
+    @include button-properties("button");
+    @include button-structure();
+
+    min-width: fit-content;
+    justify-content: center;
+    text-align: center;
+  }
+
+  &--type-link {
+    @include button-properties("link");
+    @include inherit-properties();
+
+    text-decoration: none;
+    max-width: fit-content;
+    vertical-align: baseline;
+
+    &.link--flex {
+      vertical-align: middle;
+      @include button-structure();
+    }
+  }
+
+  &--type-icon-button {
+    @include button-properties("icon-button");
+    @include button-structure();
+
+    min-width: fit-content;
+    justify-content: center;
+    text-align: center;
+
+    aspect-ratio: 1;
+    padding: 0;
+  }
+}

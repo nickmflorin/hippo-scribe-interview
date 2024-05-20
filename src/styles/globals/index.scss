@@ -1,0 +1,17 @@
+@use "./tailwind";
+
+@use "partials";
+
+@use "./components";
+
+@import "~normalize.css/normalize.css";
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+body {
+  position: relative;
+  overflow: hidden;
+}

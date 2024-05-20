@@ -1,0 +1,46 @@
+$button-border-width: 1px;
+
+$button-state-names: ("hovered", "focused", "disabled", "active");
+
+$button-font-family: theme("fontFamily.sans");
+$button-border-radius: theme("borderRadius.md");
+
+$button-types: ("button", "link", "icon-button");
+$button-default-type: "button";
+
+$button-variants: (
+  "button": (
+    "primary",
+    "secondary",
+    "bare",
+    "danger",
+  ),
+  "icon-button": (
+    "primary",
+    "secondary",
+    "transparent",
+    "bare",
+    "danger",
+    "light",
+  ),
+  "link": (
+    "primary",
+    "secondary",
+    "danger",
+  ),
+);
+
+$button-default-variant: (
+  "button": "primary",
+  "icon-button": "primary",
+  "link": "primary",
+);
+
+$button-size-names: ("xsmall", "small", "medium", "large", "xlarge");
+
+// The button's icon size will be sized based on the button's primary 'size', unless the 'icon-size'
+// is explicitly included as a class name as well
+// (e.g. button--size-small button--icon-size-xlarge).
+$button-icon-size-names: ("xsmall", "small", "medium", "large", "xlarge", "full");
+
+$button-default-size: "medium";

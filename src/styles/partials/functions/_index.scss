@@ -1,0 +1,49 @@
+@use "sass:map";
+@use "sass:meta";
+@use "sass:selector";
+@use "sass:list";
+
+/// Parses an optionally provided keyword argument from an arbitrary set of arguments,
+///
+/// @param {string} $name
+///   The name of the optionally provided keyword argument that may or may not be in the arbitrary
+///   set of arguments.
+/// @param {arglist} $args...
+///   The arbitrary set of arguments provided to a function or mixin that may or may not include
+///   the optional argument defined by `name`.
+/// @param {} $default
+///   A default value that should be used in the case that the argument is not present in the set of
+///   provided arbitrary arguments.
+@function get-optional-kwarg($name, $args...) {
+  $default: if(
+    map.has-key(meta.keywords($args), "default"),
+    map.get(meta.keywords($args), "default"),
+    null
+  );
+  $value: if(
+    map.has-key(meta.keywords($args), $name),
+    map.get(meta.keywords($args), $name),
+    $default
+  );
+  @return $value;
+}
+
+@function prefix-selectors($selectors, $prefix: null) {
+  @if $prefix {
+    $new-selectors: ();
+    @each $n in $selectors {
+      $new-selectors: list.append($new-selectors, "#{$prefix}#{$n}", list.separator($selectors));
+    }
+    @return $new-selectors;
+  }
+  @return $selectors;
+}
+
+@function join-selectors($selectors, $prefix: null) {
+  @if meta.type-of($selectors) == string {
+    @return join-selectors(selector.parse($selectors), $prefix: $prefix);
+  } @else if meta.type-of($selectors) == list {
+    @return prefix-selectors($selectors, $prefix: $prefix);
+  }
+  @error "Expected the selectors to be provided as a list or a string.";
+}
