@@ -65,7 +65,6 @@ export const useTranscribedAudio = <D extends Record<string, unknown>>({
       const microphoneListener = (e: BlobEvent) => {
         connection.send(e.data);
       };
-
       microphone.addEventListener(MicrophoneEvents.DataAvailable, microphoneListener);
       connection.addListener(LiveTranscriptionEvents.Transcript, onTranscript);
 
