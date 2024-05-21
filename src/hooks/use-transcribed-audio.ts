@@ -59,7 +59,9 @@ export const useTranscribedAudio = <D extends Record<string, unknown>>({
     ) {
       const onTranscript = async (data: LiveTranscriptionEvent) => {
         const text = data.channel.alternatives[0].transcript;
-        transcribedText.current = [...transcribedText.current, text];
+        if (text && text.trim() !== "") {
+          transcribedText.current = [...transcribedText.current, text];
+        }
       };
 
       const microphoneListener = (e: BlobEvent) => {
